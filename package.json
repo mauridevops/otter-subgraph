@@ -1,13 +1,13 @@
 {
-  "name": "olympus-subgraph",
+  "name": "otterclam-subgraph",
   "version": "0.1.0",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ olympus",
-    "create-local": "graph create --node http://pokt.drondin.xyz:18020/ olympus",
-    "remove-local": "graph remove --node http://pokt.drondin.xyz:18020/ olympus",
-    "deploy-local": "graph deploy --node http://pokt.drondin.xyz:18020/ --ipfs http://pokt.drondin.xyz:15001 olympus"
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ otterclam/otterclam",
+    "create-local": "graph create --node http://pokt.drondin.xyz:18020/ otterclam",
+    "remove-local": "graph remove --node http://pokt.drondin.xyz:18020/ otterclam",
+    "deploy-local": "graph deploy --node http://pokt.drondin.xyz:18020/ --ipfs http://pokt.drondin.xyz:15001 otterclam"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "^0.21.0",

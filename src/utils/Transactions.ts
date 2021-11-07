@@ -1,10 +1,10 @@
 import { ethereum } from '@graphprotocol/graph-ts'
 // schema imports
-import { Transaction } from "../../generated/schema"
+import { Transaction } from '../../generated/schema'
 
-export function loadOrCreateTransaction(eth_transaction : ethereum.Transaction, eth_block: ethereum.Block): Transaction{
+export function loadOrCreateTransaction(eth_transaction: ethereum.Transaction, eth_block: ethereum.Block): Transaction {
   let transaction = Transaction.load(eth_transaction.hash.toHex())
-  if (transaction == null){
+  if (transaction == null) {
     transaction = new Transaction(eth_transaction.hash.toHex())
     transaction.timestamp = eth_block.timestamp
     transaction.blockNumber = eth_block.number
