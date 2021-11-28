@@ -1,27 +1,26 @@
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
-import { OtterClamERC20 } from '../../generated/OtterStakingV1/OtterClamERC20'
-import { StakedOtterClamERC20V1 } from '../../generated/OtterStakingV1/StakedOtterClamERC20V1'
-import { OtterStakingV1 } from '../../generated/OtterStakingV1/OtterStakingV1'
-import { ClamCirculatingSupply } from '../../generated/OtterStakingV1/ClamCirculatingSupply'
-import { ERC20 } from '../../generated/OtterStakingV1/ERC20'
-import { UniswapV2Pair } from '../../generated/OtterStakingV1/UniswapV2Pair'
+import { OtterClamERC20V2 } from '../../generated/OtterTreasury/OtterClamERC20V2'
+import { StakedOtterClamERC20V2 } from '../../generated/StakedOtterClamERC20V2/StakedOtterClamERC20V2'
+import { OtterStaking } from '../../generated/OtterTreasury/OtterStaking'
+import { ClamCirculatingSupply } from '../../generated/OtterTreasury/ClamCirculatingSupply'
+import { ERC20 } from '../../generated/OtterTreasury/ERC20'
+import { UniswapV2Pair } from '../../generated/OtterTreasury/UniswapV2Pair'
 
 import { ProtocolMetric, Transaction } from '../../generated/schema'
 import {
   CIRCULATING_SUPPLY_CONTRACT,
   CIRCULATING_SUPPLY_CONTRACT_BLOCK,
   MAI_ERC20_CONTRACT,
+  FRAX_ERC20_CONTRACT,
   CLAM_ERC20_CONTRACT,
   SCLAM_ERC20_CONTRACT,
-  STAKING_CONTRACT_V1,
+  STAKING_CONTRACT,
   TREASURY_ADDRESS,
-  QUICK_CLAM_MAI_PAIR,
+  UNISWAP_CLAM_MAI_PAIR,
 } from './Constants'
 import { dayFromTimestamp } from './Dates'
 import { toDecimal } from './Decimals'
 import { getCLAMUSDRate, getDiscountedPairUSD, getPairUSD } from './Price'
-import { getHolderAux } from './Aux'
-import { updateBondDiscounts } from './BondDiscounts'
 
 export function loadOrCreateProtocolMetric(timestamp: BigInt): ProtocolMetric {
   let dayTimestamp = dayFromTimestamp(timestamp)
@@ -43,7 +42,6 @@ export function loadOrCreateProtocolMetric(timestamp: BigInt): ProtocolMetric {
     protocolMetric.currentAPY = BigDecimal.fromString('0')
     protocolMetric.treasuryMaiRiskFreeValue = BigDecimal.fromString('0')
     protocolMetric.treasuryMaiMarketValue = BigDecimal.fromString('0')
-    protocolMetric.holders = BigInt.fromI32(0)
 
     protocolMetric.save()
   }
@@ -51,17 +49,31 @@ export function loadOrCreateProtocolMetric(timestamp: BigInt): ProtocolMetric {
 }
 
 function getTotalSupply(): BigDecimal {
-  let clam_contract = OtterClamERC20.bind(Address.fromString(CLAM_ERC20_CONTRACT))
+  let clam_contract = OtterClamERC20V2.bind(
+    Address.fromString(CLAM_ERC20_CONTRACT),
+  )
   let total_supply = toDecimal(clam_contract.totalSupply(), 9)
   log.debug('Total Supply {}', [total_supply.toString()])
   return total_supply
 }
 
-function getCirculatingSupply(transaction: Transaction, total_supply: BigDecimal): BigDecimal {
+function getCirculatingSupply(
+  transaction: Transaction,
+  total_supply: BigDecimal,
+): BigDecimal {
   let circ_supply = BigDecimal.fromString('0')
-  if (transaction.blockNumber.gt(BigInt.fromString(CIRCULATING_SUPPLY_CONTRACT_BLOCK))) {
-    let circulatingSupply_contract = ClamCirculatingSupply.bind(Address.fromString(CIRCULATING_SUPPLY_CONTRACT))
-    circ_supply = toDecimal(circulatingSupply_contract.CLAMCirculatingSupply(), 9)
+  if (
+    transaction.blockNumber.gt(
+      BigInt.fromString(CIRCULATING_SUPPLY_CONTRACT_BLOCK),
+    )
+  ) {
+    let circulatingSupply_contract = ClamCirculatingSupply.bind(
+      Address.fromString(CIRCULATING_SUPPLY_CONTRACT),
+    )
+    circ_supply = toDecimal(
+      circulatingSupply_contract.CLAMCirculatingSupply(),
+      9,
+    )
   } else {
     circ_supply = total_supply
   }
@@ -72,8 +84,10 @@ function getCirculatingSupply(transaction: Transaction, total_supply: BigDecimal
 function getSClamSupply(transaction: Transaction): BigDecimal {
   let sclam_supply = BigDecimal.fromString('0')
 
-  let sclam_contract_v1 = StakedOtterClamERC20V1.bind(Address.fromString(SCLAM_ERC20_CONTRACT))
-  sclam_supply = toDecimal(sclam_contract_v1.circulatingSupply(), 9)
+  let sclam_contract = StakedOtterClamERC20V2.bind(
+    Address.fromString(SCLAM_ERC20_CONTRACT),
+  )
+  sclam_supply = toDecimal(sclam_contract.circulatingSupply(), 9)
 
   log.debug('sCLAM Supply {}', [sclam_supply.toString()])
   return sclam_supply
@@ -81,21 +95,27 @@ function getSClamSupply(transaction: Transaction): BigDecimal {
 
 function getMV_RFV(transaction: Transaction): BigDecimal[] {
   let maiERC20 = ERC20.bind(Address.fromString(MAI_ERC20_CONTRACT))
+  let fraxERC20 = ERC20.bind(Address.fromString(FRAX_ERC20_CONTRACT))
 
-  let clamMaiPair = UniswapV2Pair.bind(Address.fromString(QUICK_CLAM_MAI_PAIR))
+  let clamMaiPair = UniswapV2Pair.bind(
+    Address.fromString(UNISWAP_CLAM_MAI_PAIR),
+  )
   let treasury_address = TREASURY_ADDRESS
   let maiBalance = maiERC20.balanceOf(Address.fromString(treasury_address))
+  let fraxBalance = fraxERC20.balanceOf(Address.fromString(treasury_address))
 
-  //CLAM-DAI
-  let clamMaiBalance = clamMaiPair.balanceOf(Address.fromString(treasury_address))
+  //CLAM-MAI
+  let clamMaiBalance = clamMaiPair.balanceOf(
+    Address.fromString(treasury_address),
+  )
   let clamMaiTotalLP = toDecimal(clamMaiPair.totalSupply(), 18)
   let clamMaiPOL = toDecimal(clamMaiBalance, 18)
     .div(clamMaiTotalLP)
     .times(BigDecimal.fromString('100'))
-  let clamMai_value = getPairUSD(clamMaiBalance, QUICK_CLAM_MAI_PAIR)
-  let clamMai_rfv = getDiscountedPairUSD(clamMaiBalance, QUICK_CLAM_MAI_PAIR)
+  let clamMai_value = getPairUSD(clamMaiBalance, UNISWAP_CLAM_MAI_PAIR)
+  let clamMai_rfv = getDiscountedPairUSD(clamMaiBalance, UNISWAP_CLAM_MAI_PAIR)
 
-  let stableValue = maiBalance
+  let stableValue = maiBalance.plus(fraxBalance)
   let stableValueDecimal = toDecimal(stableValue, 18)
 
   let lpValue = clamMai_value
@@ -107,14 +127,15 @@ function getMV_RFV(transaction: Transaction): BigDecimal[] {
   log.debug('Treasury Market Value {}', [mv.toString()])
   log.debug('Treasury RFV {}', [rfv.toString()])
   log.debug('Treasury MAI value {}', [toDecimal(maiBalance, 18).toString()])
-  log.debug('Treasury CLAM-DAI RFV {}', [clamMai_rfv.toString()])
+  log.debug('Treasury Frax value {}', [toDecimal(fraxBalance, 18).toString()])
+  log.debug('Treasury CLAM-MAI RFV {}', [clamMai_rfv.toString()])
 
   return [
     mv,
     rfv,
-    // treasuryDaiRiskFreeValue = DAI RFV * DAI + aDAI
+    // treasuryMaiRiskFreeValue = MAI RFV * MAI + aMAI
     clamMai_rfv.plus(toDecimal(maiBalance, 18)),
-    // treasuryDaiMarketValue = DAI LP * DAI + aDAI
+    // treasuryMaiMarketValue = MAI LP * MAI + aMAI
     clamMai_value.plus(toDecimal(maiBalance, 18)),
     // POL
     clamMaiPOL,
@@ -122,16 +143,21 @@ function getMV_RFV(transaction: Transaction): BigDecimal[] {
 }
 
 function getNextCLAMRebase(transaction: Transaction): BigDecimal {
-  let staking_contract_v1 = OtterStakingV1.bind(Address.fromString(STAKING_CONTRACT_V1))
-  let distribution_v1 = toDecimal(staking_contract_v1.epoch().value3, 9)
+  let staking_contract = OtterStaking.bind(Address.fromString(STAKING_CONTRACT))
+  let distribution_v1 = toDecimal(staking_contract.epoch().value3, 9)
   log.debug('next_distribution v2 {}', [distribution_v1.toString()])
   let next_distribution = distribution_v1
   log.debug('next_distribution total {}', [next_distribution.toString()])
   return next_distribution
 }
 
-function getAPY_Rebase(sCLAM: BigDecimal, distributedCLAM: BigDecimal): BigDecimal[] {
-  let nextEpochRebase = distributedCLAM.div(sCLAM).times(BigDecimal.fromString('100'))
+function getAPY_Rebase(
+  sCLAM: BigDecimal,
+  distributedCLAM: BigDecimal,
+): BigDecimal[] {
+  let nextEpochRebase = distributedCLAM
+    .div(sCLAM)
+    .times(BigDecimal.fromString('100'))
 
   let nextEpochRebase_number = Number.parseFloat(nextEpochRebase.toString())
   let currentAPY = Math.pow(nextEpochRebase_number / 100 + 1, 365 * 3 - 1) * 100
@@ -144,7 +170,11 @@ function getAPY_Rebase(sCLAM: BigDecimal, distributedCLAM: BigDecimal): BigDecim
   return [currentAPYdecimal, nextEpochRebase]
 }
 
-function getRunway(sCLAM: BigDecimal, rfv: BigDecimal, rebase: BigDecimal): BigDecimal[] {
+function getRunway(
+  sCLAM: BigDecimal,
+  rfv: BigDecimal,
+  rebase: BigDecimal,
+): BigDecimal[] {
   let runway2dot5k = BigDecimal.fromString('0')
   let runway5k = BigDecimal.fromString('0')
   let runway7dot5k = BigDecimal.fromString('0')
@@ -162,16 +192,20 @@ function getRunway(sCLAM: BigDecimal, rfv: BigDecimal, rebase: BigDecimal): BigD
   ) {
     let treasury_runway = Number.parseFloat(rfv.div(sCLAM).toString())
 
-    let runway2dot5k_num = Math.log(treasury_runway) / Math.log(1 + 0.0029438) / 3
+    let runway2dot5k_num =
+      Math.log(treasury_runway) / Math.log(1 + 0.0029438) / 3
     let runway5k_num = Math.log(treasury_runway) / Math.log(1 + 0.003579) / 3
-    let runway7dot5k_num = Math.log(treasury_runway) / Math.log(1 + 0.0039507) / 3
+    let runway7dot5k_num =
+      Math.log(treasury_runway) / Math.log(1 + 0.0039507) / 3
     let runway10k_num = Math.log(treasury_runway) / Math.log(1 + 0.00421449) / 3
     let runway20k_num = Math.log(treasury_runway) / Math.log(1 + 0.00485037) / 3
     let runway50k_num = Math.log(treasury_runway) / Math.log(1 + 0.00569158) / 3
     let runway70k_num = Math.log(treasury_runway) / Math.log(1 + 0.00600065) / 3
-    let runway100k_num = Math.log(treasury_runway) / Math.log(1 + 0.00632839) / 3
+    let runway100k_num =
+      Math.log(treasury_runway) / Math.log(1 + 0.00632839) / 3
     let nextEpochRebase_number = Number.parseFloat(rebase.toString()) / 100
-    let runwayCurrent_num = Math.log(treasury_runway) / Math.log(1 + nextEpochRebase_number) / 3
+    let runwayCurrent_num =
+      Math.log(treasury_runway) / Math.log(1 + nextEpochRebase_number) / 3
 
     runway2dot5k = BigDecimal.fromString(runway2dot5k_num.toString())
     runway5k = BigDecimal.fromString(runway5k_num.toString())
@@ -184,7 +218,17 @@ function getRunway(sCLAM: BigDecimal, rfv: BigDecimal, rebase: BigDecimal): BigD
     runwayCurrent = BigDecimal.fromString(runwayCurrent_num.toString())
   }
 
-  return [runway2dot5k, runway5k, runway7dot5k, runway10k, runway20k, runway50k, runway70k, runway100k, runwayCurrent]
+  return [
+    runway2dot5k,
+    runway5k,
+    runway7dot5k,
+    runway10k,
+    runway20k,
+    runway50k,
+    runway70k,
+    runway100k,
+    runwayCurrent,
+  ]
 }
 
 export function updateProtocolMetrics(transaction: Transaction): void {
@@ -218,12 +262,19 @@ export function updateProtocolMetrics(transaction: Transaction): void {
 
   // Rebase rewards, APY, rebase
   pm.nextDistributedClam = getNextCLAMRebase(transaction)
-  let apy_rebase = getAPY_Rebase(pm.sClamCirculatingSupply, pm.nextDistributedClam)
+  let apy_rebase = getAPY_Rebase(
+    pm.sClamCirculatingSupply,
+    pm.nextDistributedClam,
+  )
   pm.currentAPY = apy_rebase[0]
   pm.nextEpochRebase = apy_rebase[1]
 
   //Runway
-  let runways = getRunway(pm.sClamCirculatingSupply, pm.treasuryRiskFreeValue, pm.nextEpochRebase)
+  let runways = getRunway(
+    pm.sClamCirculatingSupply,
+    pm.treasuryRiskFreeValue,
+    pm.nextEpochRebase,
+  )
   pm.runway2dot5k = runways[0]
   pm.runway5k = runways[1]
   pm.runway7dot5k = runways[2]
@@ -234,10 +285,5 @@ export function updateProtocolMetrics(transaction: Transaction): void {
   pm.runway100k = runways[7]
   pm.runwayCurrent = runways[8]
 
-  //Holders
-  pm.holders = getHolderAux().value
-
   pm.save()
-
-  updateBondDiscounts(transaction)
 }

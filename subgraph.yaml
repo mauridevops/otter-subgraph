@@ -1,169 +1,101 @@
 specVersion: 0.0.2
-description: OtterClam Subgraph
-repository: https://github.com/OtterClam/otter-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
-  #Staking Contract V2
   - kind: ethereum/contract
-    name: OtterStakingV1
+    name: StakedOtterClamERC20V2
     network: matic
     source:
-      address: '0xcF2A11937A906e09EbCb8B638309Ae8612850dBf'
-      abi: OtterStakingV1
-      startBlock: 20751990
+      address: '0xAAc144Dc08cE39Ed92182dd85ded60E5000C9e67'
+      abi: StakedOtterClamERC20V2
+      startBlock: 21619179
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - OtterStakingV1
+        - Transaction
+        - Approval
+        - LogRebase
+        - LogStakingContractUpdated
+        - LogSupply
+        - Transfer
       abis:
-        - name: OtterStakingV1
-          file: ./abis/OtterStakingV1.json
-        - name: StakedOtterClamERC20V1
-          file: ./abis/StakedOtterClamERC20V1.json
-        - name: OtterClamERC20
-          file: ./abis/OtterClamERC20.json
-        - name: UniswapV2Pair
-          file: ./abis/UniswapV2Pair.json
-        - name: MAIBondV1
-          file: ./abis/MAIBondV1.json
-        - name: CLAMMAIBondV1
-          file: ./abis/CLAMMAIBondV1.json
-        - name: ClamCirculatingSupply
-          file: ./abis/ClamCirculatingSupply.json
-        - name: OtterBondingCalculator
-          file: ./abis/OtterBondingCalculator.json
-        - name: ERC20
-          file: ./abis/ERC20.json
-      callHandlers:
-        - function: stake(uint256,address)
-          handler: handleStake
-        - function: unstake(uint256,bool)
-          handler: handleUnstake
-      file: ./src/OtterStakingV1.ts
-  #Staking Contract V2 Helper
-  - kind: ethereum/contract
-    name: OtterStakingHelperV1
-    network: matic
-    source:
-      address: '0xe7bcBE1fB4F0EAe667feB64b007176Ac790675f2'
-      abi: OtterStakingHelperV1
-      startBlock: 20751996
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      entities:
-        - OtterStakingHelperV1
-      abis:
-        - name: OtterStakingV1
-          file: ./abis/OtterStakingV1.json
-        - name: OtterStakingHelperV1
-          file: ./abis/OtterStakingHelperV1.json
-        - name: StakedOtterClamERC20V1
-          file: ./abis/StakedOtterClamERC20V1.json
-        - name: OtterClamERC20
-          file: ./abis/OtterClamERC20.json
-        - name: UniswapV2Pair
-          file: ./abis/UniswapV2Pair.json
-        - name: MAIBondV1
-          file: ./abis/MAIBondV1.json
-        - name: CLAMMAIBondV1
-          file: ./abis/CLAMMAIBondV1.json
-      callHandlers:
-        - function: stake(uint256)
-          handler: handleStake
-      file: ./src/OtterStakingHelperV1.ts
-  # MAI Bond Contract V1
-  - kind: ethereum/contract
-    name: MAIBondV1
-    network: matic
-    source:
-      address: '0x28077992bFA9609Ae27458A766470b03D43dEe8A'
-      abi: MAIBondV1
-      startBlock: 20751999
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      entities:
-        - DAIBondDeposit
-      abis:
-        - name: OtterStakingV1
-          file: ./abis/OtterStakingV1.json
-        - name: StakedOtterClamERC20V1
-          file: ./abis/StakedOtterClamERC20V1.json
-        - name: OtterClamERC20
-          file: ./abis/OtterClamERC20.json
-        - name: UniswapV2Pair
-          file: ./abis/UniswapV2Pair.json
-        - name: MAIBondV1
-          file: ./abis/MAIBondV1.json
-        - name: CLAMMAIBondV1
-          file: ./abis/CLAMMAIBondV1.json
-      callHandlers:
-        - function: deposit(uint256,uint256,address)
-          handler: handleDeposit
-        - function: redeem(address,bool)
-          handler: handleRedeem
-      file: ./src/MAIBondV1.ts
-  # CLAM MAI LP Bond Contract V1
-  - kind: ethereum/contract
-    name: CLAMMAIBondV1
-    network: matic
-    source:
-      address: '0x79B47c03B02019Af78Ee0de9B0b3Ac0786338a0d'
-      abi: CLAMMAIBondV1
-      startBlock: 20752001
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      entities:
-        - CLAMMAIBondV1
-      abis:
-        - name: OtterStakingV1
-          file: ./abis/OtterStakingV1.json
-        - name: StakedOtterClamERC20V1
-          file: ./abis/StakedOtterClamERC20V1.json
-        - name: OtterClamERC20
-          file: ./abis/OtterClamERC20.json
-        - name: UniswapV2Pair
-          file: ./abis/UniswapV2Pair.json
-        - name: MAIBondV1
-          file: ./abis/MAIBondV1.json
-        - name: CLAMMAIBondV1
-          file: ./abis/CLAMMAIBondV1.json
-      callHandlers:
-        - function: deposit(uint256,uint256,address)
-          handler: handleDeposit
-        - function: redeem(address,bool)
-          handler: handleRedeem
-      file: ./src/CLAMMAIBondV1.ts
+        - name: StakedOtterClamERC20V2
+          file: ./abis/StakedOtterClamERC20V2.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
+        - event: LogRebase(indexed uint256,uint256,uint256)
+          handler: handleLogRebase
+        - event: LogStakingContractUpdated(address)
+          handler: handleLogStakingContractUpdated
+        - event: LogSupply(indexed uint256,uint256,uint256)
+          handler: handleLogSupply
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/StakedOtterClamERC20V2.ts
 
   - kind: ethereum/contract
-    name: StakedOtterClamERC20V1
+    name: OtterTreasury
     network: matic
     source:
-      address: '0x3949f058238563803b5971711ad19551930c8209'
-      abi: StakedOtterClamERC20V1
-      startBlock: 20751986
+      address: '0x8ce47D56EAa1299d3e06FF3E04637449fFb01C9C'
+      abi: OtterTreasury
+      startBlock: 21619179
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - StakedOtterClamERC20V1
+        - Transaction
+        - ProtocolMetric
+        - ChangeActivated
+        - ChangeQueued
+        - CreateDebt
+        - Deposit
+        - RepayDebt
+        - ReservesAudited
+        - ReservesManaged
+        - ReservesUpdated
+        - RewardsMinted
+        - Withdrawal
       abis:
-        - name: StakedOtterClamERC20V1
-          file: ./abis/StakedOtterClamERC20V1.json
-        - name: OtterClamERC20
-          file: ./abis/OtterClamERC20.json
+        - name: OtterTreasury
+          file: ./abis/OtterTreasury.json
+        - name: StakedOtterClamERC20V2
+          file: ./abis/StakedOtterClamERC20V2.json
+        - name: OtterClamERC20V2
+          file: ./abis/OtterClamERC20V2.json
+        - name: OtterBondStakeDepository
+          file: ./abis/OtterBondStakeDepository.json
+        - name: OtterStaking
+          file: ./abis/OtterStaking.json
+        - name: ClamCirculatingSupply
+          file: ./abis/ClamCirculatingSupply.json
+        - name: ERC20
+          file: ./abis/ERC20.json
         - name: UniswapV2Pair
           file: ./abis/UniswapV2Pair.json
-      callHandlers:
-        - function: rebase(uint256,uint256)
-          handler: rebaseFunction
-      file: ./src/StakedOtterClamERC20V1.ts
+      eventHandlers:
+        - event: ChangeActivated(indexed uint8,address,bool)
+          handler: handleChangeActivated
+        - event: ChangeQueued(indexed uint8,address)
+          handler: handleChangeQueued
+        - event: CreateDebt(indexed address,indexed address,uint256,uint256)
+          handler: handleCreateDebt
+        - event: Deposit(indexed address,uint256,uint256)
+          handler: handleDeposit
+        - event: RepayDebt(indexed address,indexed address,uint256,uint256)
+          handler: handleRepayDebt
+        - event: ReservesAudited(indexed uint256)
+          handler: handleReservesAudited
+        - event: ReservesManaged(indexed address,uint256)
+          handler: handleReservesManaged
+        - event: ReservesUpdated(indexed uint256)
+          handler: handleReservesUpdated
+        - event: RewardsMinted(indexed address,indexed address,uint256)
+          handler: handleRewardsMinted
+        - event: Withdrawal(indexed address,uint256,uint256)
+          handler: handleWithdrawal
+      file: ./src/OtterTreasury.ts

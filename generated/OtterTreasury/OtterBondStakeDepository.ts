@@ -166,7 +166,7 @@ export class OwnershipPushed__Params {
   }
 }
 
-export class CLAMMAIBondV1__adjustmentResult {
+export class OtterBondStakeDepository__adjustmentResult {
   value0: boolean;
   value1: BigInt;
   value2: BigInt;
@@ -198,17 +198,25 @@ export class CLAMMAIBondV1__adjustmentResult {
   }
 }
 
-export class CLAMMAIBondV1__bondInfoResult {
+export class OtterBondStakeDepository__bondInfoResult {
   value0: BigInt;
   value1: BigInt;
   value2: BigInt;
   value3: BigInt;
+  value4: BigInt;
 
-  constructor(value0: BigInt, value1: BigInt, value2: BigInt, value3: BigInt) {
+  constructor(
+    value0: BigInt,
+    value1: BigInt,
+    value2: BigInt,
+    value3: BigInt,
+    value4: BigInt
+  ) {
     this.value0 = value0;
     this.value1 = value1;
     this.value2 = value2;
     this.value3 = value3;
+    this.value4 = value4;
   }
 
   toMap(): TypedMap<string, ethereum.Value> {
@@ -217,11 +225,12 @@ export class CLAMMAIBondV1__bondInfoResult {
     map.set("value1", ethereum.Value.fromUnsignedBigInt(this.value1));
     map.set("value2", ethereum.Value.fromUnsignedBigInt(this.value2));
     map.set("value3", ethereum.Value.fromUnsignedBigInt(this.value3));
+    map.set("value4", ethereum.Value.fromUnsignedBigInt(this.value4));
     return map;
   }
 }
 
-export class CLAMMAIBondV1__termsResult {
+export class OtterBondStakeDepository__termsResult {
   value0: BigInt;
   value1: BigInt;
   value2: BigInt;
@@ -257,9 +266,9 @@ export class CLAMMAIBondV1__termsResult {
   }
 }
 
-export class CLAMMAIBondV1 extends ethereum.SmartContract {
-  static bind(address: Address): CLAMMAIBondV1 {
-    return new CLAMMAIBondV1("CLAMMAIBondV1", address);
+export class OtterBondStakeDepository extends ethereum.SmartContract {
+  static bind(address: Address): OtterBondStakeDepository {
+    return new OtterBondStakeDepository("OtterBondStakeDepository", address);
   }
 
   CLAM(): Address {
@@ -292,14 +301,14 @@ export class CLAMMAIBondV1 extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
-  adjustment(): CLAMMAIBondV1__adjustmentResult {
+  adjustment(): OtterBondStakeDepository__adjustmentResult {
     let result = super.call(
       "adjustment",
       "adjustment():(bool,uint256,uint256,uint256,uint256)",
       []
     );
 
-    return new CLAMMAIBondV1__adjustmentResult(
+    return new OtterBondStakeDepository__adjustmentResult(
       result[0].toBoolean(),
       result[1].toBigInt(),
       result[2].toBigInt(),
@@ -308,7 +317,9 @@ export class CLAMMAIBondV1 extends ethereum.SmartContract {
     );
   }
 
-  try_adjustment(): ethereum.CallResult<CLAMMAIBondV1__adjustmentResult> {
+  try_adjustment(): ethereum.CallResult<
+    OtterBondStakeDepository__adjustmentResult
+  > {
     let result = super.tryCall(
       "adjustment",
       "adjustment():(bool,uint256,uint256,uint256,uint256)",
@@ -319,7 +330,7 @@ export class CLAMMAIBondV1 extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(
-      new CLAMMAIBondV1__adjustmentResult(
+      new OtterBondStakeDepository__adjustmentResult(
         value[0].toBoolean(),
         value[1].toBigInt(),
         value[2].toBigInt(),
@@ -348,27 +359,28 @@ export class CLAMMAIBondV1 extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
-  bondInfo(param0: Address): CLAMMAIBondV1__bondInfoResult {
+  bondInfo(param0: Address): OtterBondStakeDepository__bondInfoResult {
     let result = super.call(
       "bondInfo",
-      "bondInfo(address):(uint256,uint256,uint256,uint256)",
+      "bondInfo(address):(uint256,uint256,uint256,uint256,uint256)",
       [ethereum.Value.fromAddress(param0)]
     );
 
-    return new CLAMMAIBondV1__bondInfoResult(
+    return new OtterBondStakeDepository__bondInfoResult(
       result[0].toBigInt(),
       result[1].toBigInt(),
       result[2].toBigInt(),
-      result[3].toBigInt()
+      result[3].toBigInt(),
+      result[4].toBigInt()
     );
   }
 
   try_bondInfo(
     param0: Address
-  ): ethereum.CallResult<CLAMMAIBondV1__bondInfoResult> {
+  ): ethereum.CallResult<OtterBondStakeDepository__bondInfoResult> {
     let result = super.tryCall(
       "bondInfo",
-      "bondInfo(address):(uint256,uint256,uint256,uint256)",
+      "bondInfo(address):(uint256,uint256,uint256,uint256,uint256)",
       [ethereum.Value.fromAddress(param0)]
     );
     if (result.reverted) {
@@ -376,11 +388,12 @@ export class CLAMMAIBondV1 extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(
-      new CLAMMAIBondV1__bondInfoResult(
+      new OtterBondStakeDepository__bondInfoResult(
         value[0].toBigInt(),
         value[1].toBigInt(),
         value[2].toBigInt(),
-        value[3].toBigInt()
+        value[3].toBigInt(),
+        value[4].toBigInt()
       )
     );
   }
@@ -690,6 +703,21 @@ export class CLAMMAIBondV1 extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
+  sCLAM(): Address {
+    let result = super.call("sCLAM", "sCLAM():(address)", []);
+
+    return result[0].toAddress();
+  }
+
+  try_sCLAM(): ethereum.CallResult<Address> {
+    let result = super.tryCall("sCLAM", "sCLAM():(address)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
   staking(): Address {
     let result = super.call("staking", "staking():(address)", []);
 
@@ -698,25 +726,6 @@ export class CLAMMAIBondV1 extends ethereum.SmartContract {
 
   try_staking(): ethereum.CallResult<Address> {
     let result = super.tryCall("staking", "staking():(address)", []);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  stakingHelper(): Address {
-    let result = super.call("stakingHelper", "stakingHelper():(address)", []);
-
-    return result[0].toAddress();
-  }
-
-  try_stakingHelper(): ethereum.CallResult<Address> {
-    let result = super.tryCall(
-      "stakingHelper",
-      "stakingHelper():(address)",
-      []
-    );
     if (result.reverted) {
       return new ethereum.CallResult();
     }
@@ -747,14 +756,14 @@ export class CLAMMAIBondV1 extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  terms(): CLAMMAIBondV1__termsResult {
+  terms(): OtterBondStakeDepository__termsResult {
     let result = super.call(
       "terms",
       "terms():(uint256,uint256,uint256,uint256,uint256,uint256)",
       []
     );
 
-    return new CLAMMAIBondV1__termsResult(
+    return new OtterBondStakeDepository__termsResult(
       result[0].toBigInt(),
       result[1].toBigInt(),
       result[2].toBigInt(),
@@ -764,7 +773,7 @@ export class CLAMMAIBondV1 extends ethereum.SmartContract {
     );
   }
 
-  try_terms(): ethereum.CallResult<CLAMMAIBondV1__termsResult> {
+  try_terms(): ethereum.CallResult<OtterBondStakeDepository__termsResult> {
     let result = super.tryCall(
       "terms",
       "terms():(uint256,uint256,uint256,uint256,uint256,uint256)",
@@ -775,7 +784,7 @@ export class CLAMMAIBondV1 extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(
-      new CLAMMAIBondV1__termsResult(
+      new OtterBondStakeDepository__termsResult(
         value[0].toBigInt(),
         value[1].toBigInt(),
         value[2].toBigInt(),
@@ -815,21 +824,6 @@ export class CLAMMAIBondV1 extends ethereum.SmartContract {
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toAddress());
   }
-
-  useHelper(): boolean {
-    let result = super.call("useHelper", "useHelper():(bool)", []);
-
-    return result[0].toBoolean();
-  }
-
-  try_useHelper(): ethereum.CallResult<boolean> {
-    let result = super.tryCall("useHelper", "useHelper():(bool)", []);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBoolean());
-  }
 }
 
 export class ConstructorCall extends ethereum.Call {
@@ -853,20 +847,24 @@ export class ConstructorCall__Inputs {
     return this._call.inputValues[0].value.toAddress();
   }
 
-  get _principle(): Address {
+  get _sCLAM(): Address {
     return this._call.inputValues[1].value.toAddress();
   }
 
-  get _treasury(): Address {
+  get _principle(): Address {
     return this._call.inputValues[2].value.toAddress();
   }
 
-  get _DAO(): Address {
+  get _treasury(): Address {
     return this._call.inputValues[3].value.toAddress();
   }
 
-  get _bondCalculator(): Address {
+  get _DAO(): Address {
     return this._call.inputValues[4].value.toAddress();
+  }
+
+  get _bondCalculator(): Address {
+    return this._call.inputValues[5].value.toAddress();
   }
 }
 
@@ -1223,10 +1221,6 @@ export class SetStakingCall__Inputs {
 
   get _staking(): Address {
     return this._call.inputValues[0].value.toAddress();
-  }
-
-  get _helper(): boolean {
-    return this._call.inputValues[1].value.toBoolean();
   }
 }
 

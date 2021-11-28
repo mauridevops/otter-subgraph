@@ -1,87 +1,3 @@
-type DailyBond @entity {
-  id: ID!
-  timestamp: BigInt!
-  token: Token!
-  amount: BigDecimal!
-  value: BigDecimal!
-}
-
-type OtterClam @entity {
-  id: ID!
-  bondDeposits: [Deposit!]! @derivedFrom(field: "otter")
-  bondRedemptions: [Redemption!]! @derivedFrom(field: "otter")
-  stakeTransactions: [Stake!]! @derivedFrom(field: "otter")
-  unstakeTransactions: [Unstake!]! @derivedFrom(field: "otter")
-  historicBalance: [OtterClamBalance!]! @derivedFrom(field: "otter")
-  lastBalance: OtterClamBalance
-  active: Boolean!
-}
-
-type OtterClamBalance @entity {
-  id: ID!
-  otter: OtterClam!
-  sClamBalance: BigDecimal!
-  clamBalance: BigDecimal!
-  bondBalance: BigDecimal!
-  dollarBalance: BigDecimal!
-  stakes: [ContractInfo!]
-  bonds: [ContractInfo!]
-  timestamp: BigInt!
-}
-
-type Deposit @entity {
-  id: ID!
-  transaction: Transaction!
-  otter: OtterClam!
-  amount: BigDecimal!
-  maxPremium: BigDecimal!
-  token: Token!
-  value: BigDecimal!
-  timestamp: BigInt!
-}
-
-type Redemption @entity {
-  id: ID!
-  transaction: Transaction
-  otter: OtterClam
-  token: Token
-  timestamp: BigInt
-}
-
-type Stake @entity {
-  id: ID!
-  transaction: Transaction!
-  otter: OtterClam!
-  amount: BigDecimal!
-  timestamp: BigInt!
-}
-
-type Unstake @entity {
-  id: ID!
-  transaction: Transaction!
-  otter: OtterClam!
-  amount: BigDecimal!
-  timestamp: BigInt!
-}
-
-type Rebase @entity {
-  id: ID!
-  transaction: String!
-  amount: BigDecimal!
-  stakedClams: BigDecimal!
-  percentage: BigDecimal!
-  contract: String!
-  timestamp: BigInt!
-  value: BigDecimal!
-}
-
-type DailyStakingReward @entity {
-  id: ID!
-  timestamp: BigInt!
-  amount: BigDecimal!
-  value: BigDecimal!
-}
-
 type Transaction @entity {
   id: ID!
   timestamp: BigInt!
@@ -90,12 +6,151 @@ type Transaction @entity {
   from: Bytes!
   to: Bytes
   value: BigInt!
-  gasUsed: BigInt!
   gasPrice: BigInt!
 }
 
-type Token @entity {
+type Approval @entity {
   id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  owner: Bytes! # address
+  spender: Bytes! # address
+  value: BigInt! # uint256
+}
+
+type LogRebase @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  epoch: BigInt! # uint256
+  rebase: BigInt! # uint256
+  index: BigInt! # uint256
+}
+
+type LogStakingContractUpdated @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  stakingContract: Bytes! # address
+}
+
+type LogSupply @entity {
+  id: ID!
+  transaction: Transaction!
+  epoch: BigInt! # uint256
+  timestamp: BigInt! # uint256
+  totalSupply: BigInt! # uint256
+}
+
+type Transfer @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  from: Bytes! # address
+  to: Bytes! # address
+  value: BigInt! # uint256
+}
+
+type ChangeActivated @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  managing: Int! # uint8
+  activated: Bytes! # address
+  result: Boolean! # bool
+}
+
+type ChangeQueued @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  managing: Int! # uint8
+  queued: Bytes! # address
+}
+
+type CreateDebt @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  debtor: Bytes! # address
+  token: Bytes! # address
+  amount: BigInt! # uint256
+  value: BigInt! # uint256
+}
+
+type Deposit @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  token: Bytes! # address
+  amount: BigInt! # uint256
+  value: BigInt! # uint256
+}
+
+type OwnershipPulled @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+}
+
+type OwnershipPushed @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+}
+
+type RepayDebt @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  debtor: Bytes! # address
+  token: Bytes! # address
+  amount: BigInt! # uint256
+  value: BigInt! # uint256
+}
+
+type ReservesAudited @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  totalReserves: BigInt! # uint256
+}
+
+type ReservesManaged @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  token: Bytes! # address
+  amount: BigInt! # uint256
+}
+
+type ReservesUpdated @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  totalReserves: BigInt! # uint256
+}
+
+type RewardsMinted @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  caller: Bytes! # address
+  recipient: Bytes! # address
+  amount: BigInt! # uint256
+}
+
+type Withdrawal @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  token: Bytes! # address
+  amount: BigInt! # uint256
+  value: BigInt! # uint256
 }
 
 type ProtocolMetric @entity {
@@ -124,24 +179,4 @@ type ProtocolMetric @entity {
   runway100k: BigDecimal
   runwayCurrent: BigDecimal
   treasuryClamMaiPOL: BigDecimal!
-  holders: BigInt!
-}
-
-type ContractInfo @entity {
-  id: ID!
-  name: String
-  contract: String
-  amount: BigDecimal
-}
-
-type Aux @entity {
-  id: ID!
-  value: BigInt!
-}
-
-type BondDiscount @entity {
-  id: ID!
-  timestamp: BigInt!
-  mai_discount: BigDecimal!
-  clammai_discount: BigDecimal!
 }

@@ -176,7 +176,7 @@ export class Transfer__Params {
   }
 }
 
-export class StakedOtterClamERC20V1__rebasesResult {
+export class StakedOtterClamERC20V2__rebasesResult {
   value0: BigInt;
   value1: BigInt;
   value2: BigInt;
@@ -216,9 +216,9 @@ export class StakedOtterClamERC20V1__rebasesResult {
   }
 }
 
-export class StakedOtterClamERC20V1 extends ethereum.SmartContract {
-  static bind(address: Address): StakedOtterClamERC20V1 {
-    return new StakedOtterClamERC20V1("StakedOtterClamERC20V1", address);
+export class StakedOtterClamERC20V2 extends ethereum.SmartContract {
+  static bind(address: Address): StakedOtterClamERC20V2 {
+    return new StakedOtterClamERC20V2("StakedOtterClamERC20V2", address);
   }
 
   DOMAIN_SEPARATOR(): Bytes {
@@ -615,14 +615,14 @@ export class StakedOtterClamERC20V1 extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  rebases(param0: BigInt): StakedOtterClamERC20V1__rebasesResult {
+  rebases(param0: BigInt): StakedOtterClamERC20V2__rebasesResult {
     let result = super.call(
       "rebases",
       "rebases(uint256):(uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
       [ethereum.Value.fromUnsignedBigInt(param0)]
     );
 
-    return new StakedOtterClamERC20V1__rebasesResult(
+    return new StakedOtterClamERC20V2__rebasesResult(
       result[0].toBigInt(),
       result[1].toBigInt(),
       result[2].toBigInt(),
@@ -635,7 +635,7 @@ export class StakedOtterClamERC20V1 extends ethereum.SmartContract {
 
   try_rebases(
     param0: BigInt
-  ): ethereum.CallResult<StakedOtterClamERC20V1__rebasesResult> {
+  ): ethereum.CallResult<StakedOtterClamERC20V2__rebasesResult> {
     let result = super.tryCall(
       "rebases",
       "rebases(uint256):(uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
@@ -646,7 +646,7 @@ export class StakedOtterClamERC20V1 extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(
-      new StakedOtterClamERC20V1__rebasesResult(
+      new StakedOtterClamERC20V2__rebasesResult(
         value[0].toBigInt(),
         value[1].toBigInt(),
         value[2].toBigInt(),
@@ -848,6 +848,32 @@ export class ApproveCall__Outputs {
 
   get value0(): boolean {
     return this._call.outputValues[0].value.toBoolean();
+  }
+}
+
+export class CompleteMigrationCall extends ethereum.Call {
+  get inputs(): CompleteMigrationCall__Inputs {
+    return new CompleteMigrationCall__Inputs(this);
+  }
+
+  get outputs(): CompleteMigrationCall__Outputs {
+    return new CompleteMigrationCall__Outputs(this);
+  }
+}
+
+export class CompleteMigrationCall__Inputs {
+  _call: CompleteMigrationCall;
+
+  constructor(call: CompleteMigrationCall) {
+    this._call = call;
+  }
+}
+
+export class CompleteMigrationCall__Outputs {
+  _call: CompleteMigrationCall;
+
+  constructor(call: CompleteMigrationCall) {
+    this._call = call;
   }
 }
 
