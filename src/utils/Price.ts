@@ -1,4 +1,4 @@
-import { UNISWAP_CLAM_MAI_PAIR } from './Constants'
+import { UNI_CLAM_MAI_PAIR } from './Constants'
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { UniswapV2Pair } from '../../generated/OtterTreasury/UniswapV2Pair'
 import { toDecimal } from './Decimals'
@@ -7,7 +7,7 @@ let BIG_DECIMAL_1E9 = BigDecimal.fromString('1e9')
 let BIG_DECIMAL_1E12 = BigDecimal.fromString('1e12')
 
 export function getCLAMUSDRate(): BigDecimal {
-  let pair = UniswapV2Pair.bind(Address.fromString(UNISWAP_CLAM_MAI_PAIR))
+  let pair = UniswapV2Pair.bind(Address.fromString(UNI_CLAM_MAI_PAIR))
 
   let reserves = pair.getReserves()
   let reserve0 = reserves.value1.toBigDecimal()

@@ -16,7 +16,9 @@ import {
   SCLAM_ERC20_CONTRACT,
   STAKING_CONTRACT,
   TREASURY_ADDRESS,
-  UNISWAP_CLAM_MAI_PAIR,
+  UNI_CLAM_MAI_PAIR,
+  // UNI_CLAM_FRAX_PAIR,
+  // UNI_CLAM_FRAX_PAIR_BLOCK,
 } from './Constants'
 import { dayFromTimestamp } from './Dates'
 import { toDecimal } from './Decimals'
@@ -42,6 +44,8 @@ export function loadOrCreateProtocolMetric(timestamp: BigInt): ProtocolMetric {
     protocolMetric.currentAPY = BigDecimal.fromString('0')
     protocolMetric.treasuryMaiRiskFreeValue = BigDecimal.fromString('0')
     protocolMetric.treasuryMaiMarketValue = BigDecimal.fromString('0')
+    protocolMetric.treasuryFraxRiskFreeValue = BigDecimal.fromString('0')
+    protocolMetric.treasuryFraxMarketValue = BigDecimal.fromString('0')
 
     protocolMetric.save()
   }
@@ -97,9 +101,9 @@ function getMV_RFV(transaction: Transaction): BigDecimal[] {
   let maiERC20 = ERC20.bind(Address.fromString(MAI_ERC20_CONTRACT))
   let fraxERC20 = ERC20.bind(Address.fromString(FRAX_ERC20_CONTRACT))
 
-  let clamMaiPair = UniswapV2Pair.bind(
-    Address.fromString(UNISWAP_CLAM_MAI_PAIR),
-  )
+  let clamMaiPair = UniswapV2Pair.bind(Address.fromString(UNI_CLAM_MAI_PAIR))
+  // let clamFraxPair = UniswapV2Pair.bind(Address.fromString(UNI_CLAM_FRAX_PAIR))
+
   let treasury_address = TREASURY_ADDRESS
   let maiBalance = maiERC20.balanceOf(Address.fromString(treasury_address))
   let fraxBalance = fraxERC20.balanceOf(Address.fromString(treasury_address))
@@ -112,14 +116,37 @@ function getMV_RFV(transaction: Transaction): BigDecimal[] {
   let clamMaiPOL = toDecimal(clamMaiBalance, 18)
     .div(clamMaiTotalLP)
     .times(BigDecimal.fromString('100'))
-  let clamMai_value = getPairUSD(clamMaiBalance, UNISWAP_CLAM_MAI_PAIR)
-  let clamMai_rfv = getDiscountedPairUSD(clamMaiBalance, UNISWAP_CLAM_MAI_PAIR)
+  let clamMai_value = getPairUSD(clamMaiBalance, UNI_CLAM_MAI_PAIR)
+  let clamMai_rfv = getDiscountedPairUSD(clamMaiBalance, UNI_CLAM_MAI_PAIR)
+
+  //CLAM-FRAX
+  // let clamFraxBalance = BigInt.fromI32(0)
+  let clamFrax_value = BigDecimal.fromString('0')
+  let clamFrax_rfv = BigDecimal.fromString('0')
+  // let clamFraxTotalLP = BigDecimal.fromString('0')
+  // let clamFraxPOL = BigDecimal.fromString('0')
+  // if (transaction.blockNumber.gt(BigInt.fromString(UNI_CLAM_FRAX_PAIR_BLOCK))) {
+  //   clamFraxBalance = clamFraxPair.balanceOf(
+  //     Address.fromString(treasury_address),
+  //   )
+  //   clamFrax_value = getPairUSD(clamFraxBalance, UNI_CLAM_FRAX_PAIR)
+  //   clamFrax_rfv = getDiscountedPairUSD(clamFraxBalance, UNI_CLAM_FRAX_PAIR)
+  //   clamFraxTotalLP = toDecimal(clamFraxPair.totalSupply(), 18)
+  //   if (
+  //     clamFraxTotalLP.gt(BigDecimal.fromString('0')) &&
+  //     clamFraxBalance.gt(BigInt.fromI32(0))
+  //   ) {
+  //     clamFraxPOL = toDecimal(clamFraxBalance, 18)
+  //       .div(clamFraxTotalLP)
+  //       .times(BigDecimal.fromString('100'))
+  //   }
+  // }
 
   let stableValue = maiBalance.plus(fraxBalance)
   let stableValueDecimal = toDecimal(stableValue, 18)
 
-  let lpValue = clamMai_value
-  let rfvLpValue = clamMai_rfv
+  let lpValue = clamMai_value.plus(clamFrax_value)
+  let rfvLpValue = clamMai_rfv.plus(clamFrax_rfv)
 
   let mv = stableValueDecimal.plus(lpValue)
   let rfv = stableValueDecimal.plus(rfvLpValue)
@@ -129,6 +156,7 @@ function getMV_RFV(transaction: Transaction): BigDecimal[] {
   log.debug('Treasury MAI value {}', [toDecimal(maiBalance, 18).toString()])
   log.debug('Treasury Frax value {}', [toDecimal(fraxBalance, 18).toString()])
   log.debug('Treasury CLAM-MAI RFV {}', [clamMai_rfv.toString()])
+  log.debug('Treasury CLAM-FRAX RFV {}', [clamFrax_rfv.toString()])
 
   return [
     mv,
@@ -137,6 +165,10 @@ function getMV_RFV(transaction: Transaction): BigDecimal[] {
     clamMai_rfv.plus(toDecimal(maiBalance, 18)),
     // treasuryMaiMarketValue = MAI LP * MAI + aMAI
     clamMai_value.plus(toDecimal(maiBalance, 18)),
+    // treasuryFraxRiskFreeValue = FRAX RFV * FRAX
+    clamFrax_rfv.plus(toDecimal(fraxBalance, 18)),
+    // treasuryFraxMarketValue = FRAX LP * FRAX
+    clamFrax_value.plus(toDecimal(fraxBalance, 18)),
     // POL
     clamMaiPOL,
   ]
@@ -258,7 +290,9 @@ export function updateProtocolMetrics(transaction: Transaction): void {
   pm.treasuryRiskFreeValue = mv_rfv[1]
   pm.treasuryMaiRiskFreeValue = mv_rfv[2]
   pm.treasuryMaiMarketValue = mv_rfv[3]
-  pm.treasuryClamMaiPOL = mv_rfv[4]
+  pm.treasuryFraxRiskFreeValue = mv_rfv[4]
+  pm.treasuryFraxMarketValue = mv_rfv[5]
+  pm.treasuryClamMaiPOL = mv_rfv[6]
 
   // Rebase rewards, APY, rebase
   pm.nextDistributedClam = getNextCLAMRebase(transaction)

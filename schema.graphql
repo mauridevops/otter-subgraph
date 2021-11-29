@@ -168,6 +168,8 @@ type ProtocolMetric @entity {
   nextDistributedClam: BigDecimal!
   treasuryMaiRiskFreeValue: BigDecimal!
   treasuryMaiMarketValue: BigDecimal!
+  treasuryFraxRiskFreeValue: BigDecimal!
+  treasuryFraxMarketValue: BigDecimal!
   currentAPY: BigDecimal!
   runway2dot5k: BigDecimal
   runway5k: BigDecimal
