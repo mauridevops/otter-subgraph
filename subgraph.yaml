@@ -8,7 +8,7 @@ dataSources:
     source:
       address: '0xAAc144Dc08cE39Ed92182dd85ded60E5000C9e67'
       abi: StakedOtterClamERC20V2
-      startBlock: 21619179
+      startBlock: 21593526
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -42,7 +42,7 @@ dataSources:
     source:
       address: '0x8ce47D56EAa1299d3e06FF3E04637449fFb01C9C'
       abi: OtterTreasury
-      startBlock: 21619179
+      startBlock: 21593526
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
