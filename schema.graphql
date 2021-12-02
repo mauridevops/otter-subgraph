@@ -181,4 +181,5 @@ type ProtocolMetric @entity {
   runway100k: BigDecimal
   runwayCurrent: BigDecimal
   treasuryClamMaiPOL: BigDecimal!
+  treasuryClamFraxPOL: BigDecimal!
 }

@@ -1496,6 +1496,7 @@ export class ProtocolMetric extends Entity {
     );
     this.set("currentAPY", Value.fromBigDecimal(BigDecimal.zero()));
     this.set("treasuryClamMaiPOL", Value.fromBigDecimal(BigDecimal.zero()));
+    this.set("treasuryClamFraxPOL", Value.fromBigDecimal(BigDecimal.zero()));
   }
 
   save(): void {
@@ -1828,5 +1829,14 @@ export class ProtocolMetric extends Entity {
 
   set treasuryClamMaiPOL(value: BigDecimal) {
     this.set("treasuryClamMaiPOL", Value.fromBigDecimal(value));
+  }
+
+  get treasuryClamFraxPOL(): BigDecimal {
+    let value = this.get("treasuryClamFraxPOL");
+    return value!.toBigDecimal();
+  }
+
+  set treasuryClamFraxPOL(value: BigDecimal) {
+    this.set("treasuryClamFraxPOL", Value.fromBigDecimal(value));
   }
 }
