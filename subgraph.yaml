@@ -77,6 +77,8 @@ dataSources:
           file: ./abis/ERC20.json
         - name: UniswapV2Pair
           file: ./abis/UniswapV2Pair.json
+        - name: AggregatorV3InterfaceABI
+          file: ./abis/AggregatorV3InterfaceABI.json
       eventHandlers:
         - event: ChangeActivated(indexed uint8,address,bool)
           handler: handleChangeActivated

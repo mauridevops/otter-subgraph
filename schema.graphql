@@ -170,6 +170,8 @@ type ProtocolMetric @entity {
   treasuryMaiMarketValue: BigDecimal!
   treasuryFraxRiskFreeValue: BigDecimal!
   treasuryFraxMarketValue: BigDecimal!
+  treasuryWmaticRiskFreeValue: BigDecimal!
+  treasuryWmaticMarketValue: BigDecimal!
   currentAPY: BigDecimal!
   runway2dot5k: BigDecimal
   runway5k: BigDecimal
@@ -182,4 +184,5 @@ type ProtocolMetric @entity {
   runwayCurrent: BigDecimal
   treasuryClamMaiPOL: BigDecimal!
   treasuryClamFraxPOL: BigDecimal!
+  treasuryClamWmaticPOL: BigDecimal!
 }

@@ -1,6 +1,7 @@
-import { UNI_CLAM_MAI_PAIR } from './Constants'
+import { UNI_CLAM_MAI_PAIR, USDC_MATIC_AGGREGATOR } from './Constants'
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { UniswapV2Pair } from '../../generated/OtterTreasury/UniswapV2Pair'
+import { AggregatorV3InterfaceABI } from '../../generated/OtterTreasury/AggregatorV3InterfaceABI'
 import { toDecimal } from './Decimals'
 
 let BIG_DECIMAL_1E9 = BigDecimal.fromString('1e9')
@@ -62,4 +63,12 @@ export function getPairUSD(
   let total_lp_usd = ohm_value.plus(toDecimal(lp_token_1, 18))
 
   return ownedLP.times(total_lp_usd)
+}
+
+export function getWmaticUSDRate(): BigDecimal {
+  let pair = AggregatorV3InterfaceABI.bind(
+    Address.fromString(USDC_MATIC_AGGREGATOR),
+  )
+  let wmaticPrice = pair.latestRoundData()
+  return toDecimal(wmaticPrice.value1, 8)
 }
