@@ -15,6 +15,7 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - Transaction
+        - ProtocolMetric
         - Approval
         - LogRebase
         - LogStakingContractUpdated
@@ -23,6 +24,22 @@ dataSources:
       abis:
         - name: StakedOtterClamERC20V2
           file: ./abis/StakedOtterClamERC20V2.json
+        # -- ProtocolMetric --
+        - name: OtterClamERC20V2
+          file: ./abis/OtterClamERC20V2.json
+        - name: OtterBondStakeDepository
+          file: ./abis/OtterBondStakeDepository.json
+        - name: OtterStaking
+          file: ./abis/OtterStaking.json
+        - name: ClamCirculatingSupply
+          file: ./abis/ClamCirculatingSupply.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: AggregatorV3InterfaceABI
+          file: ./abis/AggregatorV3InterfaceABI.json
+        # --------------------
       eventHandlers:
         - event: Approval(indexed address,indexed address,uint256)
           handler: handleApproval
@@ -63,6 +80,7 @@ dataSources:
       abis:
         - name: OtterTreasury
           file: ./abis/OtterTreasury.json
+        # -- ProtocolMetric --
         - name: StakedOtterClamERC20V2
           file: ./abis/StakedOtterClamERC20V2.json
         - name: OtterClamERC20V2
@@ -79,6 +97,7 @@ dataSources:
           file: ./abis/UniswapV2Pair.json
         - name: AggregatorV3InterfaceABI
           file: ./abis/AggregatorV3InterfaceABI.json
+        # --------------------
       eventHandlers:
         - event: ChangeActivated(indexed uint8,address,bool)
           handler: handleChangeActivated

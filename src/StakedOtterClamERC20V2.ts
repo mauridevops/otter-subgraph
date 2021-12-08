@@ -15,6 +15,7 @@ import {
 } from '../generated/schema'
 import { log } from '@graphprotocol/graph-ts'
 import { loadOrCreateTransaction } from './utils/Transactions'
+import { updateProtocolMetrics } from './utils/ProtocolMetrics'
 
 export function handleApproval(event: ApprovalEvent): void {
   let transaction = loadOrCreateTransaction(event.transaction, event.block)
@@ -67,5 +68,6 @@ export function handleTransfer(event: TransferEvent): void {
   entity.value = event.params.value
   entity.timestamp = transaction.timestamp
   entity.transaction = transaction.id
+  updateProtocolMetrics(transaction)
   entity.save()
 }
