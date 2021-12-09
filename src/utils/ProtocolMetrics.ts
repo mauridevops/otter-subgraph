@@ -20,6 +20,8 @@ import {
   UNI_CLAM_MAI_PAIR,
   UNI_CLAM_FRAX_PAIR,
   UNI_CLAM_FRAX_PAIR_BLOCK,
+  UNI_CLAM_WMATIC_PAIR,
+  UNI_CLAM_WMATIC_PAIR_BLOCK,
 } from './Constants'
 import { dayFromTimestamp } from './Dates'
 import { toDecimal } from './Decimals'
@@ -27,7 +29,8 @@ import {
   getCLAMUSDRate,
   getDiscountedPairUSD,
   getPairUSD,
-  getWmaticUSDRate,
+  getWMATICUSDRate,
+  getPairWMATIC,
 } from './Price'
 
 export function loadOrCreateProtocolMetric(timestamp: BigInt): ProtocolMetric {
@@ -115,16 +118,16 @@ function getMV_RFV(transaction: Transaction): BigDecimal[] {
 
   let clamMaiPair = UniswapV2Pair.bind(Address.fromString(UNI_CLAM_MAI_PAIR))
   let clamFraxPair = UniswapV2Pair.bind(Address.fromString(UNI_CLAM_FRAX_PAIR))
-  // let clamMaticPair = UniswapV2Pair.bind(
-  //   Address.fromString(UNI_CLAM_MATIC_PAIR),
-  // )
+  let clamWmaticPair = UniswapV2Pair.bind(
+    Address.fromString(UNI_CLAM_WMATIC_PAIR),
+  )
 
   let treasury_address = TREASURY_ADDRESS
   let maiBalance = maiERC20.balanceOf(Address.fromString(treasury_address))
   let fraxBalance = fraxERC20.balanceOf(Address.fromString(treasury_address))
 
   let wmaticBalance = maticERC20.balanceOf(Address.fromString(treasury_address))
-  let wmatic_value = toDecimal(wmaticBalance, 18).times(getWmaticUSDRate())
+  let wmatic_value = toDecimal(wmaticBalance, 18).times(getWMATICUSDRate())
 
   //CLAM-MAI
   let clamMaiBalance = clamMaiPair.balanceOf(
@@ -161,31 +164,31 @@ function getMV_RFV(transaction: Transaction): BigDecimal[] {
   }
 
   //OHMETH
-  // let clamMatic = BigInt.fromI32(0)
+  let clamWmatic = BigInt.fromI32(0)
   let clamWmatic_value = BigDecimal.fromString('0')
   let clamWmatic_rfv = BigDecimal.fromString('0')
-  // let clamMaticTotalLP = BigDecimal.fromString('0')
+  let clamWmaticTotalLP = BigDecimal.fromString('0')
   let clamWmaticPOL = BigDecimal.fromString('0')
-  // if (
-  //   transaction.blockNumber.gt(BigInt.fromString(UIN_CLAM_MATIC_PAIR_BLOCK))
-  // ) {
-  //   clamMatic = clamMaticPair.balanceOf(Address.fromString(treasury_address))
-  //   log.debug('clamMaticBalance {}', [clamMatic.toString()])
+  if (
+    transaction.blockNumber.gt(BigInt.fromString(UNI_CLAM_WMATIC_PAIR_BLOCK))
+  ) {
+    clamWmatic = clamWmaticPair.balanceOf(Address.fromString(treasury_address))
+    log.debug('clamMaticBalance {}', [clamWmatic.toString()])
 
-  //   clamMatic_value = getPairWETH(clamMatic, UNI_CLAM_MATIC_PAIR)
-  //   log.debug('clamMatic_value {}', [clamMatic_value.toString()])
+    clamWmatic_value = getPairWMATIC(clamWmatic, UNI_CLAM_WMATIC_PAIR)
+    log.debug('clamWmatic_value {}', [clamWmatic_value.toString()])
 
-  //   clamMatic_rfv = getDiscountedPairUSD(clamMatic, UNI_CLAM_MATIC_PAIR)
-  //   clamMaticTotalLP = toDecimal(clamMaticPair.totalSupply(), 18)
-  //   if (
-  //     clamMaticTotalLP.gt(BigDecimal.fromString('0')) &&
-  //     clamMatic.gt(BigInt.fromI32(0))
-  //   ) {
-  //     clamMaticPOL = toDecimal(clamMatic, 18)
-  //       .div(clamMaticTotalLP)
-  //       .times(BigDecimal.fromString('100'))
-  //   }
-  // }
+    clamWmatic_rfv = getDiscountedPairUSD(clamWmatic, UNI_CLAM_WMATIC_PAIR)
+    clamWmaticTotalLP = toDecimal(clamWmaticPair.totalSupply(), 18)
+    if (
+      clamWmaticTotalLP.gt(BigDecimal.fromString('0')) &&
+      clamWmatic.gt(BigInt.fromI32(0))
+    ) {
+      clamWmaticPOL = toDecimal(clamWmatic, 18)
+        .div(clamWmaticTotalLP)
+        .times(BigDecimal.fromString('100'))
+    }
+  }
 
   let stableValue = maiBalance.plus(fraxBalance)
   let stableValueDecimal = toDecimal(stableValue, 18)

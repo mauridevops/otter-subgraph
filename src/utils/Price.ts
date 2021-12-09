@@ -7,6 +7,14 @@ import { toDecimal } from './Decimals'
 let BIG_DECIMAL_1E9 = BigDecimal.fromString('1e9')
 let BIG_DECIMAL_1E12 = BigDecimal.fromString('1e12')
 
+export function getWMATICUSDRate(): BigDecimal {
+  let pair = AggregatorV3InterfaceABI.bind(
+    Address.fromString(USDC_MATIC_AGGREGATOR),
+  )
+  let wmaticPrice = pair.latestRoundData()
+  return toDecimal(wmaticPrice.value1, 8)
+}
+
 export function getCLAMUSDRate(): BigDecimal {
   let pair = UniswapV2Pair.bind(Address.fromString(UNI_CLAM_MAI_PAIR))
 
@@ -65,10 +73,18 @@ export function getPairUSD(
   return ownedLP.times(total_lp_usd)
 }
 
-export function getWmaticUSDRate(): BigDecimal {
-  let pair = AggregatorV3InterfaceABI.bind(
-    Address.fromString(USDC_MATIC_AGGREGATOR),
-  )
-  let wmaticPrice = pair.latestRoundData()
-  return toDecimal(wmaticPrice.value1, 8)
+export function getPairWMATIC(
+  lp_amount: BigInt,
+  pair_adress: string,
+): BigDecimal {
+  let pair = UniswapV2Pair.bind(Address.fromString(pair_adress))
+  let total_lp = pair.totalSupply()
+  let lp_token_0 = pair.getReserves().value1
+  let lp_token_1 = pair.getReserves().value0
+  let ownedLP = toDecimal(lp_amount, 18).div(toDecimal(total_lp, 18))
+  let clam_value = toDecimal(lp_token_0, 9).times(getCLAMUSDRate())
+  let matic_value = toDecimal(lp_token_1, 18).times(getWMATICUSDRate())
+  let total_lp_usd = clam_value.plus(matic_value)
+
+  return ownedLP.times(total_lp_usd)
 }
