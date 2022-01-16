@@ -5,10 +5,10 @@
     "codegen": "graph codegen",
     "build": "graph build",
     "auth": "graph auth --product hosted-service",
-    "deploy": "graph deploy --product hosted-service otterclam/otterclam",
-    "create-local": "graph create --node http://localhost:8020/ otterclam/otterclam",
-    "remove-local": "graph remove --node http://localhost:8020/ otterclam/otterclam",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 otterclam/otterclam"
+    "deploy": "graph deploy --product hosted-service mauridevops/jojo",
+    "create-local": "graph create --node http://localhost:8020/ mauridevops/jojo",
+    "remove-local": "graph remove --node http://localhost:8020/ mauridevops/jojo",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 mauridevops/jojo"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.23.1",
